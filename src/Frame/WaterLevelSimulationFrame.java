@@ -54,19 +54,21 @@ public class WaterLevelSimulationFrame extends JFrame {
         Initialize();
 
         ChartPanel chartPanel = new ChartPanel();
-        SectionPlane curve = new SectionPlane(currentSection.getPoints());
-        chartPanel.setCurve(curve);
+        chartPanel.setSectionPlane(currentSection.getPoints());
+        chartPanel.setWaterLevel(CurrentWaterLevelItem().WaterLevel);
         getContentPane().add(chartPanel);
     }
 
     private void Initialize() {
         // 将当前断面置为Map中的第一个断面
-        currentSection = sectionMap.firstEntry().getValue();
+//        currentSection = sectionMap.firstEntry().getValue();
+        currentSection = sectionMap.get(2);
+        currentWaterLevelIndex = 0;
     }
 }
 
 class ChartPanel extends JPanel {
-    private SectionPlane curve;
+    private SectionPlane sectionPlane;
     private double waterLevel;
 
     protected void paintComponent(Graphics g) {
@@ -78,25 +80,29 @@ class ChartPanel extends JPanel {
     }
 
     private void paintSectionPlane(Graphics2D g2d) {
-        curve.setSize(getWidth(), getHeight());
-//        g2d.drawPolyline(curve.getXSeries(), curve.getYSeries(), curve.getPointsCount());
-        Polygon polygon = new Polygon(curve.getXSeries(), curve.getYSeries(), curve.getPointsCount());
-
-        g2d.fillPolygon(polygon);
+        sectionPlane.setSize(getWidth(), getHeight());
+        sectionPlane.setWaterLevel(waterLevel);
+//        g2d.fillPolygon(sectionPlane.getPolygon());
+        sectionPlane.paint(g2d);
     }
 
     private void paintWaterLevelLine(Graphics2D g2d) {
 
     }
 
-    public void setCurve(SectionPlane curve) {
-        this.curve = curve;
+    public void setSectionPlane(TreeSet<MPoint> points) {
+        this.sectionPlane = new SectionPlane(points);
+    }
+
+    public void setWaterLevel(double waterLevel) {
+        this.waterLevel = waterLevel;
     }
 }
 
 class SectionPlane {
     private TreeSet<MPoint> points;
-    private int[][] screenXY; // screenXY[0]为x坐标构成的数组，screenXY[1]为y坐标构成的数组
+    private double waterLevel;
+
     private double left;
     private double bottom;
     private double right;
@@ -104,12 +110,11 @@ class SectionPlane {
     private int width;
     private int height;
 
-    public int[] getXSeries() {
-        return screenXY[0];
-    }
+    private int[] xpoints;
+    private int[] ypoints;
 
-    public int[] getYSeries() {
-        return screenXY[1];
+    public int ScreenWaterLevel() {
+        return screenY(waterLevel);
     }
 
     public SectionPlane(TreeSet<MPoint> points) {
@@ -117,36 +122,42 @@ class SectionPlane {
         setSize(0, 0);
     }
 
-    private void updateScreenXy() {
-        int i = 0;
-        for (MPoint mPoint : points) {
-            screenXY[0][i] = screenX(mPoint.x, width);
-            screenXY[1][i] = screenY(mPoint.y, height);
-            ++i;
-        }
-        screenXY[0][i] = screenX(right, width);
-        screenXY[1][i] = screenY(bottom, height);
-        screenXY[0][i + 1] = screenX(left, width);
-        screenXY[1][i + 1] = screenY(bottom, height);
+    public void paint(Graphics2D g2d) {
+        int y = ScreenWaterLevel();
+        Color color = g2d.getColor();
+        g2d.setColor(Color.blue);
+        g2d.fillRect(0, y, width, y);
+        g2d.setColor(color);
+        g2d.fillPolygon(xpoints, ypoints, points.size() + 2);
     }
 
-    private int screenX(double x, int width) {
+    private void updatePolygon() {
+        xpoints = new int[points.size() + 2];
+        ypoints = new int[points.size() + 2];
+        int i = 0;
+        for (MPoint mPoint : points) {
+            xpoints[i] = screenX(mPoint.x);
+            ypoints[i] = screenY(mPoint.y);
+            ++i;
+        }
+        xpoints[i] = screenX(right);
+        ypoints[i] = screenY(bottom);
+        xpoints[i + 1] = screenX(left);
+        ypoints[i + 1] = screenY(bottom);
+    }
+
+    private int screenX(double x) {
         return (int) ((x - left) * width / (right - left));
     }
 
-    private int screenY(double y, int height) {
+    private int screenY(double y) {
         return height - (int) ((y - bottom) * height / (top - bottom));
-    }
-
-    public int getPointsCount() {
-        return points.size()+2;
     }
 
     public void setPoints(TreeSet<MPoint> points) {
         this.points = points;
-        screenXY = new int[2][points.size() + 2];
         updateCorner();
-        updateScreenXy();
+        updatePolygon();
     }
 
     private void updateCorner() {
@@ -171,6 +182,10 @@ class SectionPlane {
         this.width = width;
         this.height = height;
         updateCorner();
-        updateScreenXy();
+        updatePolygon();
+    }
+
+    public void setWaterLevel(double waterLevel) {
+        this.waterLevel = waterLevel;
     }
 }

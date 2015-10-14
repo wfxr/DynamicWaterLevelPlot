@@ -31,7 +31,7 @@ public class Section {
         return mPoints;
     }
 
-//    public void setCurve(TreeSet<MPoint> mPoints) {
+//    public void setSectionPlane(TreeSet<MPoint> mPoints) {
 //        this.mPoints = mPoints;
 //    }
 
