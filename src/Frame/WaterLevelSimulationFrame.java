@@ -54,7 +54,7 @@ public class WaterLevelSimulationFrame extends JFrame {
         Initialize();
 
         ChartPanel chartPanel = new ChartPanel();
-        SectionCurve curve = new SectionCurve(currentSection.getPoints());
+        SectionPlane curve = new SectionPlane(currentSection.getPoints());
         chartPanel.setCurve(curve);
         getContentPane().add(chartPanel);
     }
@@ -66,7 +66,7 @@ public class WaterLevelSimulationFrame extends JFrame {
 }
 
 class ChartPanel extends JPanel {
-    private SectionCurve curve;
+    private SectionPlane curve;
     private double waterLevel;
 
     protected void paintComponent(Graphics g) {
@@ -74,27 +74,29 @@ class ChartPanel extends JPanel {
         Graphics2D g2d = (Graphics2D) g;
         g2d.setStroke(new BasicStroke(3.0f));
         g2d.setColor(Color.darkGray);
-        paintSectionCurve(g2d);
+        paintSectionPlane(g2d);
     }
 
-    private void paintSectionCurve(Graphics2D g2d) {
+    private void paintSectionPlane(Graphics2D g2d) {
         curve.setSize(getWidth(), getHeight());
-        g2d.drawPolyline(curve.getXSeries(), curve.getYSeries(), curve.getPointsCount());
+//        g2d.drawPolyline(curve.getXSeries(), curve.getYSeries(), curve.getPointsCount());
+        Polygon polygon = new Polygon(curve.getXSeries(), curve.getYSeries(), curve.getPointsCount());
+
+        g2d.fillPolygon(polygon);
     }
 
-    private void paintWaterLevelLine(Graphics2D g2d){
-
+    private void paintWaterLevelLine(Graphics2D g2d) {
 
     }
 
-    public void setCurve(SectionCurve curve) {
+    public void setCurve(SectionPlane curve) {
         this.curve = curve;
     }
 }
 
-class SectionCurve {
+class SectionPlane {
     private TreeSet<MPoint> points;
-    private int[][] screenXy; // screenXy[0]为x坐标构成的数组，screenXy[1]为y坐标构成的数组
+    private int[][] screenXY; // screenXY[0]为x坐标构成的数组，screenXY[1]为y坐标构成的数组
     private double left;
     private double bottom;
     private double right;
@@ -103,14 +105,14 @@ class SectionCurve {
     private int height;
 
     public int[] getXSeries() {
-        return screenXy[0];
+        return screenXY[0];
     }
 
     public int[] getYSeries() {
-        return screenXy[1];
+        return screenXY[1];
     }
 
-    public SectionCurve(TreeSet<MPoint> points) {
+    public SectionPlane(TreeSet<MPoint> points) {
         setPoints(points);
         setSize(0, 0);
     }
@@ -118,10 +120,14 @@ class SectionCurve {
     private void updateScreenXy() {
         int i = 0;
         for (MPoint mPoint : points) {
-            screenXy[0][i] = screenX(mPoint.x, width);
-            screenXy[1][i] = screenY(mPoint.y, height);
+            screenXY[0][i] = screenX(mPoint.x, width);
+            screenXY[1][i] = screenY(mPoint.y, height);
             ++i;
         }
+        screenXY[0][i] = screenX(right, width);
+        screenXY[1][i] = screenY(bottom, height);
+        screenXY[0][i + 1] = screenX(left, width);
+        screenXY[1][i + 1] = screenY(bottom, height);
     }
 
     private int screenX(double x, int width) {
@@ -133,12 +139,12 @@ class SectionCurve {
     }
 
     public int getPointsCount() {
-        return points.size();
+        return points.size()+2;
     }
 
     public void setPoints(TreeSet<MPoint> points) {
         this.points = points;
-        screenXy = new int[2][points.size()];
+        screenXY = new int[2][points.size() + 2];
         updateCorner();
         updateScreenXy();
     }
