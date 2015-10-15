@@ -106,7 +106,6 @@ public class WaterLevelSimulationFrame extends JFrame {
         timer = new Timer(30, timerListener);
         lblTitle = new JLabel("Water Level Simulation");
         chart = new ChartPanel();
-        layout = new GridBagLayout();
         controlPanel = new JPanel();
         statusPanel = new JPanel();
 
@@ -126,6 +125,16 @@ public class WaterLevelSimulationFrame extends JFrame {
 
         statusPanel.add(new JLabel("Status Area"));
 
+        this.add(lblTitle);
+        this.add(chart);
+        this.add(controlPanel);
+        this.add(statusPanel);
+
+        SetLayout();
+    }
+
+    public void SetLayout(){
+        layout = new GridBagLayout();
         GridBagConstraints constraints = new GridBagConstraints();
         // ±êÌâÇø
         constraints.gridx = 0;
@@ -167,11 +176,6 @@ public class WaterLevelSimulationFrame extends JFrame {
         constraints.fill = GridBagConstraints.NONE;
         constraints.insets = new Insets(10,10,10,10);
         layout.setConstraints(statusPanel, constraints);
-
-        this.add(lblTitle);
-        this.add(chart);
-        this.add(controlPanel);
-        this.add(statusPanel);
 
         this.setLayout(layout);
     }
