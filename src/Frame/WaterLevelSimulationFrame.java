@@ -2,136 +2,133 @@ package Frame;
 
 import Data.MPoint;
 import Data.Section;
-import Data.WaterLevelItem;
+import javafx.scene.chart.Axis;
+import javafx.scene.chart.NumberAxis;
 
 import javax.swing.*;
+import javax.swing.Timer;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.*;
-import java.util.List;
 
 /**
  * Created by Wenxu on 2015/10/14.
  */
 public class WaterLevelSimulationFrame extends JFrame {
     private TreeMap<Integer, Section> sectionMap;
-    private Section currentSection;
-    private int currentWaterLevelIndex;
+    private Section section;  // 当前断面
+    private int waterLevelIndex;  // 当前水位索引
+    private ChartPanel chartPanel;
 
-    private Section getCurrentSection() {
-        return currentSection;
-    }
+    public void Run(){
+        ActionListener listener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ++waterLevelIndex;
+                if(waterLevelIndex < section.getWaterLevelsCount())
+                    chartPanel.setWaterLevel(section.getWaterLevel(waterLevelIndex));
+            }
+        };
 
-    private void setCurrentSection(int sectionId) {
-        currentSection = sectionMap.get(sectionId);
-    }
-
-    private List<WaterLevelItem> currentWaterLevelGroup() {
-        return currentSection.getWaterGroup();
-    }
-
-    private WaterLevelItem CurrentWaterLevelItem() {
-        return currentWaterLevelGroup().get(currentWaterLevelIndex);
-    }
-
-    // 前进一帧
-    public boolean Forward() {
-        if (currentWaterLevelIndex == currentWaterLevelGroup().size() - 1)
-            return false;
-        ++currentWaterLevelIndex;
-        return true;
-    }
-
-    // 后退一帧
-    public boolean Backward() {
-        if (currentWaterLevelIndex == 0)
-            return false;
-        --currentWaterLevelIndex;
-        return true;
+        Timer timer = new Timer(30, listener);
+        timer.start();
     }
 
     public WaterLevelSimulationFrame(TreeMap<Integer, Section> sectionMap) {
         this.sectionMap = sectionMap;
         Initialize();
 
-        ChartPanel chartPanel = new ChartPanel();
-        chartPanel.setSectionPlane(currentSection.getPoints());
-        chartPanel.setWaterLevel(CurrentWaterLevelItem().WaterLevel);
+        chartPanel = new ChartPanel();
+        chartPanel.setSectionPlane(section.getPoints());
         getContentPane().add(chartPanel);
     }
 
     private void Initialize() {
         // 将当前断面置为Map中的第一个断面
-//        currentSection = sectionMap.firstEntry().getValue();
-        currentSection = sectionMap.get(2);
-        currentWaterLevelIndex = 0;
+//        section = sectionMap.firstEntry().getValue();
+        // TODO: 目前只有断面2的水位数据，所以初始状态选用2断面以供测试
+        section = sectionMap.get(2);
+        waterLevelIndex = -1;
     }
 }
 
 class ChartPanel extends JPanel {
-    private SectionPlane sectionPlane;
-    private double waterLevel;
+    private SectionGraph sectionPlane;
 
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        Graphics2D g2d = (Graphics2D) g;
-        g2d.setStroke(new BasicStroke(3.0f));
-        g2d.setColor(Color.darkGray);
-        paintSectionPlane(g2d);
+        paintSectionPlane((Graphics2D)g);
     }
 
     private void paintSectionPlane(Graphics2D g2d) {
         sectionPlane.setSize(getWidth(), getHeight());
-        sectionPlane.setWaterLevel(waterLevel);
-//        g2d.fillPolygon(sectionPlane.getPolygon());
         sectionPlane.paint(g2d);
     }
 
-    private void paintWaterLevelLine(Graphics2D g2d) {
-
-    }
-
     public void setSectionPlane(TreeSet<MPoint> points) {
-        this.sectionPlane = new SectionPlane(points);
+        this.sectionPlane = new SectionGraph(points);
+        this.repaint();
     }
 
     public void setWaterLevel(double waterLevel) {
-        this.waterLevel = waterLevel;
+        sectionPlane.setWaterLevel(waterLevel);
+        this.repaint();
     }
 }
 
-class SectionPlane {
-    private TreeSet<MPoint> points;
-    private double waterLevel;
+class SectionGraph {
+    private TreeSet<MPoint> points; // 断面测点数据
+    private double waterLevel;      // 水位值
 
-    private double left;
-    private double bottom;
-    private double right;
-    private double top;
-    private int width;
-    private int height;
+    private Color sectionColor; // 断面颜色
+    private Color waterColor;   // 水体颜色
 
-    private int[] xpoints;
-    private int[] ypoints;
+    private double left;   // 原始数据坐标左边界
+    private double bottom; // 原始数据坐标下边界
+    private double right;  // 原始数据坐标右边界
+    private double top;    // 原始数据坐标上边界
 
+    private int width;  // 图像屏幕尺寸
+    private int height; // 图像屏幕高度
+
+    private int[] xpoints; // 断面屏幕坐标x系列
+    private int[] ypoints; // 断面屏幕坐标y系列
+
+    public void setSectionColor(Color color){
+        this.sectionColor = color;
+    }
+
+    public void setWaterColor(Color color){
+        this.waterColor = color;
+    }
+
+    // 返回水位的屏幕Y坐标
     public int ScreenWaterLevel() {
         return screenY(waterLevel);
     }
 
-    public SectionPlane(TreeSet<MPoint> points) {
-        setPoints(points);
+    public SectionGraph(TreeSet<MPoint> points) {
+        setSectionColor(Color.darkGray);
+        setWaterColor(Color.blue);
+        this.points = points;
         setSize(0, 0);
     }
 
     public void paint(Graphics2D g2d) {
-        int y = ScreenWaterLevel();
         Color color = g2d.getColor();
-        g2d.setColor(Color.blue);
+
+        int y = ScreenWaterLevel();
+        g2d.setColor(waterColor);
         g2d.fillRect(0, y, width, y);
-        g2d.setColor(color);
+
+        g2d.setColor(sectionColor);
         g2d.fillPolygon(xpoints, ypoints, points.size() + 2);
+
+        g2d.setColor(color);
     }
 
-    private void updatePolygon() {
+    private void updateScreenSectionData() {
         xpoints = new int[points.size() + 2];
         ypoints = new int[points.size() + 2];
         int i = 0;
@@ -154,13 +151,7 @@ class SectionPlane {
         return height - (int) ((y - bottom) * height / (top - bottom));
     }
 
-    public void setPoints(TreeSet<MPoint> points) {
-        this.points = points;
-        updateCorner();
-        updatePolygon();
-    }
-
-    private void updateCorner() {
+    private void updateOriginalBoundaries() {
         right = top = Double.MIN_VALUE;
         left = bottom = Double.MAX_VALUE;
         for (MPoint mPoint : points) {
@@ -181,8 +172,8 @@ class SectionPlane {
     public void setSize(int width, int height) {
         this.width = width;
         this.height = height;
-        updateCorner();
-        updatePolygon();
+        updateOriginalBoundaries();
+        updateScreenSectionData();
     }
 
     public void setWaterLevel(double waterLevel) {
