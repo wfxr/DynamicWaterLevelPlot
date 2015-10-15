@@ -19,7 +19,7 @@ public class ChartPanel extends JComponent {
         sectionPlane.paint(g2d);
     }
 
-    public void setSectionPlane(TreeSet<MPoint> points) {
+    public void setSectionData(TreeSet<MPoint> points) {
         this.sectionPlane = new SectionGraph(points);
         this.repaint();
     }

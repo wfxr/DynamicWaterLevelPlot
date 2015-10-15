@@ -1,110 +1,177 @@
 package Frame;
 
 import Data.MPoint;
+import javafx.geometry.Rectangle2D;
 
 import java.awt.*;
+import java.awt.geom.Line2D;
 import java.util.TreeSet;
 
 public class SectionGraph {
-    private TreeSet<MPoint> points; // 断面测点数据
-    private double waterLevel;      // 水位值
+    private double[] xSeries;   // 断面数据x系列
+    private double[] ySeries;   // 断面数据y系列
+    private double waterLevel;  // 水位值
+
+    private int sectionDataCount;  // 断面数据个数
 
     private Color sectionColor; // 断面颜色
     private Color waterColor;   // 水体颜色
+    private Color axisColor;    // 坐标轴颜色
 
-    private double left;   // 原始数据坐标左边界
-    private double bottom; // 原始数据坐标下边界
-    private double right;  // 原始数据坐标右边界
-    private double top;    // 原始数据坐标上边界
+    private Rectangle2D bounds; // 原始数据边界
 
-    private int width;  // 图像屏幕尺寸
-    private int height; // 图像屏幕高度
+    private int sectionWidth;  // 断面宽度
+    private int sectionHeight; // 断面高度
 
-    private int[] xpoints; // 断面屏幕坐标x系列
-    private int[] ypoints; // 断面屏幕坐标y系列
+    private int width;      // 图表宽度
+    private int height;     // 图表高度
 
-    public void setSectionColor(Color color) {
-        this.sectionColor = color;
-    }
-
-    public void setWaterColor(Color color) {
-        this.waterColor = color;
-    }
-
-    // 返回水位的屏幕Y坐标
-    public int ScreenWaterLevel() {
-        return screenY(waterLevel);
-    }
+    private Polygon section;
+    private Polygon water;
+    private Line2D xAxis;
 
     public SectionGraph(TreeSet<MPoint> points) {
-        setSectionColor(Color.darkGray);
-        setWaterColor(Color.blue);
-        this.points = points;
-        setSize(0, 0);
+        section = new Polygon();
+        water = new Polygon();
+        xAxis = new Line2D.Double();
+
+
+        axisColor = Color.cyan;
+        sectionColor = Color.darkGray;
+        waterColor = Color.blue;
+
+        setSectionData(points);
+    }
+
+    public void setSectionData(TreeSet<MPoint> points) {
+        // 将points中的数据存储到xSeries和ySeries
+        sectionDataCount = points.size();
+        xSeries = new double[sectionDataCount];
+        ySeries = new double[sectionDataCount];
+        int i = 0;
+        for (MPoint mPoint : points) {
+            xSeries[i] = mPoint.x;
+            ySeries[i] = mPoint.y;
+            ++i;
+        }
+
+        updateBounds();
+        updateSection();
+        updateWater();
+        updateAxis();
+    }
+
+    private void updateAxis() {
+        int x1 = screenX(bounds.getMinX());
+        int x2 = screenX(bounds.getMaxX());
+        int y = screenY(bounds.getMinY());
+        xAxis.setLine(x1, y, x2, y);
     }
 
     public void paint(Graphics2D g2d) {
         Color color = g2d.getColor();
 
-        int y = ScreenWaterLevel();
+
         g2d.setColor(waterColor);
-        g2d.fillRect(0, y, width, y);
+        g2d.fill(water);
 
         g2d.setColor(sectionColor);
-        g2d.fillPolygon(xpoints, ypoints, points.size() + 2);
+        g2d.fill(section);
+
+        paintAxis(g2d);
 
         g2d.setColor(color);
     }
 
-    private void updateScreenSectionData() {
-        xpoints = new int[points.size() + 2];
-        ypoints = new int[points.size() + 2];
-        int i = 0;
-        for (MPoint mPoint : points) {
-            xpoints[i] = screenX(mPoint.x);
-            ypoints[i] = screenY(mPoint.y);
-            ++i;
+    private void paintAxis(Graphics2D g2d){
+        Color color = g2d.getColor();
+        Stroke stroke =  g2d.getStroke();
+
+        g2d.setColor(axisColor);
+        g2d.setStroke(new BasicStroke(10));
+        g2d.draw(xAxis);
+
+        g2d.setColor(color);
+        g2d.setStroke(stroke);
+    }
+
+    private void updateSection() {
+        int npoint = sectionDataCount + 2;  // 断面多边形顶点数
+        int[] xpoints = new int[npoint];
+        int[] ypoints = new int[npoint];
+        for (int i = 0; i < npoint - 2; ++i) {
+            xpoints[i] = screenX(xSeries[i]);
+            ypoints[i] = screenY(ySeries[i]);
         }
-        xpoints[i] = screenX(right);
-        ypoints[i] = screenY(bottom);
-        xpoints[i + 1] = screenX(left);
-        ypoints[i + 1] = screenY(bottom);
+
+        // 右下角点
+        xpoints[npoint - 2] = screenX(bounds.getMaxX());
+        ypoints[npoint - 2] = screenY(bounds.getMinY());
+        // 左下角点
+        xpoints[npoint - 1] = screenX(bounds.getMinX());
+        ypoints[npoint - 1] = screenY(bounds.getMinY());
+
+        section.npoints = npoint;
+        section.xpoints = xpoints;
+        section.ypoints = ypoints;
+    }
+
+    private void updateWater() {
+        int left = screenX(bounds.getMinX());
+        int right = screenX(bounds.getMaxX());
+        int top = screenY(waterLevel);
+        int bottom = screenY(bounds.getMinY());
+        int[] xpoints = {left, right, right, left};
+        int[] ypoints = {top, top, bottom, bottom};
+        water.npoints = 4;
+        water.xpoints = xpoints;
+        water.ypoints = ypoints;
     }
 
     private int screenX(double x) {
-        return (int) ((x - left) * width / (right - left));
+        return (int) (normalizedX(x) * sectionWidth);
     }
 
     private int screenY(double y) {
-        return height - (int) ((y - bottom) * height / (top - bottom));
+        return (int) (normalizedY(y) * sectionHeight);
     }
 
-    private void updateOriginalBoundaries() {
-        right = top = Double.MIN_VALUE;
-        left = bottom = Double.MAX_VALUE;
-        for (MPoint mPoint : points) {
-            if (right < mPoint.x)
-                right = mPoint.x;
+    private double normalizedX(double x) {
+        return ((x - bounds.getMinX()) / bounds.getWidth());
+    }
 
-            if (left > mPoint.x)
-                left = mPoint.x;
+    private double normalizedY(double y) {
+        return 1 - (y - bounds.getMinY()) / bounds.getHeight();
+    }
 
-            if (top < mPoint.y)
-                top = mPoint.y;
-
-            if (bottom > mPoint.y)
-                bottom = mPoint.y;
+    // 更新断面数据的坐标边界
+    private void updateBounds() {
+        double min_x, min_y, max_x, max_y;
+        max_x = max_y = Double.MIN_VALUE;
+        min_x = min_y = Double.MAX_VALUE;
+        for (int i = 0; i < sectionDataCount; ++i) {
+            if (max_x < xSeries[i]) max_x = xSeries[i];
+            if (min_x > xSeries[i]) min_x = xSeries[i];
+            if (max_y < ySeries[i]) max_y = ySeries[i];
+            if (min_y > ySeries[i]) min_y = ySeries[i];
         }
+        bounds = new Rectangle2D(min_x, min_y, max_x - min_x, max_y - min_y);
     }
 
     public void setSize(int width, int height) {
-        this.width = width;
         this.height = height;
-        updateOriginalBoundaries();
-        updateScreenSectionData();
+        this.width = width;
+
+        this.sectionWidth = width - 50;
+        this.sectionHeight = height - 50;
+
+        updateSection();
+        updateWater();
+        updateAxis();
     }
 
     public void setWaterLevel(double waterLevel) {
         this.waterLevel = waterLevel;
+        updateWater();
     }
 }

@@ -1,7 +1,6 @@
 package Frame;
 
 import Data.Section;
-import com.sun.deploy.trace.LoggerTraceListener;
 
 import javax.swing.*;
 import javax.swing.Timer;
@@ -87,7 +86,7 @@ public class WaterLevelSimulationFrame extends JFrame {
     }
 
     private void ResetSectionStatus() {
-        chart.setSectionPlane(section.getPoints());
+        chart.setSectionData(section.getPoints());
         SetWaterLevelIndex(0);
         timer.stop();
         btnSwitch.setText("Play");
