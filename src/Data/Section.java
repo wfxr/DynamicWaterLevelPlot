@@ -6,12 +6,16 @@ import java.util.*;
  * Created by Wenxu on 2015/10/14.
  */
 public class Section {
-    private TreeSet<MPoint> points; // 断面测点高程数据
+    private List<MPoint> points; // 断面测点高程数据
     private List<WaterLevelItem> waterLevels; // 时间-水位数据
 
     public Section() {
-        this.points = new TreeSet<>();
+        this.points = new ArrayList<>();
         this.waterLevels = new ArrayList<>();
+    }
+
+    public List<WaterLevelItem> getWaterLevelItems(){
+        return waterLevels;
     }
 
     public int getWaterLevelsCount() { return waterLevels.size();}
@@ -24,7 +28,7 @@ public class Section {
         waterLevels.add(new WaterLevelItem(date, waterLevel));
     }
 
-    public TreeSet<MPoint> getPoints() {
+    public List<MPoint> getPoints() {
         return points;
     }
 

@@ -3,7 +3,6 @@ package Frame;
 import Data.Section;
 
 import javax.swing.*;
-import javax.swing.Timer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -14,47 +13,22 @@ import java.util.*;
  */
 public class WaterLevelSimulationFrame extends JFrame {
     private TreeMap<Integer, Section> sectionMap;
-    private Section section;  // µ±Ç°¶ÏÃæ
-    private int waterLevelIndex;  // µ±Ç°Ë®Î»Ë÷Òı
+    private Section section;  // å½“å‰æ–­é¢
 
     private GridBagLayout layout;
     private JPanel controlPanel;
     private JPanel statusPanel;
-    private Timer timer;
 
-    private JLabel lblTitle;
+//    private JLabel lblTitle;
 
     private JButton btnSwitch;
-    private JButton btnReset;
+    private JButton btnFrameForward;
+    private JButton btnFrameBackward;
     private JButton btnExit;
+    private JButton btnStop;
 
-    private ChartPanel chart;
-
-    ActionListener switchListener = new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            if (IsPlaying()) Pause();
-            else Play();
-        }
-    };
-
-
-    ActionListener timerListener = new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            if (!IsLastFrame())
-                AdvanceOneFrame();
-            else
-                timer.stop();
-        }
-    };
-
-    ActionListener resetListener = new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            ResetSectionStatus();
-        }
-    };
+    private Player player;
+    private JPanel playerPanel;
 
     ActionListener exitListener = new ActionListener() {
         @Override
@@ -63,79 +37,99 @@ public class WaterLevelSimulationFrame extends JFrame {
         }
     };
 
-    private boolean IsLastFrame() {
-        return waterLevelIndex == section.getWaterLevelsCount() - 1;
-    }
+    ActionListener switchListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (player.IsStopped()){
+                player.Play();
+                btnSwitch.setText("æš‚åœ");
+            }else if(player.IsFinished()) {
+                player.Stop();
+                player.Play();
+                btnSwitch.setText("æš‚åœ");
+            } else if (player.IsPaused()) {
+                btnSwitch.setText("æš‚åœ");
+                player.Play();
+            } else if (player.IsPlaying()) {
+                player.Pause();
+                btnSwitch.setText("æ’­æ”¾");
+            }
+        }
+    };
 
-    private void AdvanceOneFrame(){
-        SetWaterLevelIndex(waterLevelIndex + 1);
-    }
+    ActionListener stopListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            player.Stop();
+            btnSwitch.setText("æ’­æ”¾");
+        }
+    };
 
-    private boolean IsPlaying() {
-        return timer.isRunning();
-    }
+    ActionListener frameForwardListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            player.FrameForward();
+        }
+    };
+    ActionListener frameBackwardListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            player.FrameBackward();
+        }
+    };
+    PlayerListener playerListener = new PlayerListener() {
 
-    private void Play() {
-        btnSwitch.setText("Pause");
-        timer.start();
-    }
-
-    private void Pause() {
-        btnSwitch.setText("Continue");
-        timer.stop();
-    }
-
-    private void ResetSectionStatus() {
-        chart.setSectionData(section.getPoints());
-        SetWaterLevelIndex(0);
-        timer.stop();
-        btnSwitch.setText("Play");
-    }
+        @Override
+        public void performOnFinish() {
+            btnSwitch.setText("æ’­æ”¾");
+        }
+    };
 
     private void Exit() {
         System.exit(0);
     }
 
-    private void SetWaterLevelIndex(int index) {
-        waterLevelIndex = index;
-        chart.setWaterLevel(section.getWaterLevel(index));
-    }
-
     public void InitComponents() {
-        timer = new Timer(30, timerListener);
-        lblTitle = new JLabel("Water Level Simulation");
-        chart = new ChartPanel();
+//        lblTitle = new JLabel("æ°´ä½-æ—¶é—´æ¨¡æ‹Ÿ");
         controlPanel = new JPanel();
+        playerPanel = player.createPlayerPanel();
         statusPanel = new JPanel();
 
-        btnSwitch = new JButton("Play");
-        btnReset = new JButton("ResetSectionStatus");
-        btnExit = new JButton("Exit");
-
-        lblTitle.setFont(new Font("Arial", 0, 18));
+        btnSwitch = new JButton("æ’­æ”¾");
+        btnFrameForward = new JButton("ä¸‹ä¸€å¸§");
+        btnFrameBackward = new JButton("ä¸Šä¸€å¸§");
+        btnStop = new JButton("åœæ­¢");
+        btnExit = new JButton("é€€å‡º");
 
         btnSwitch.addActionListener(switchListener);
-        btnReset.addActionListener(resetListener);
+        btnFrameForward.addActionListener(frameForwardListener);
+        btnFrameBackward.addActionListener(frameBackwardListener);
+        btnStop.addActionListener(stopListener);
         btnExit.addActionListener(exitListener);
 
+        player.addPlayerListenerList(playerListener);
+
         controlPanel.add(btnSwitch);
-        controlPanel.add(btnReset);
+        controlPanel.add(btnFrameForward);
+        controlPanel.add(btnFrameBackward);
+        controlPanel.add(btnStop);
         controlPanel.add(btnExit);
 
         statusPanel.add(new JLabel("Status Area"));
 
-        this.add(lblTitle);
-        this.add(chart);
+//        this.add(lblTitle);
+        this.add(playerPanel);
         this.add(controlPanel);
-        this.add(statusPanel);
+        // TODO:æ·»åŠ çŠ¶æ€åŒº
+//        this.add(statusPanel);
 
         SetLayout();
     }
 
-    public void SetLayout(){
+    public void SetLayout() {
         layout = new GridBagLayout();
         GridBagConstraints constraints = new GridBagConstraints();
-        // ±êÌâÇø
+        // æ ‡é¢˜åŒº
         constraints.gridx = 0;
         constraints.gridy = 0;
         constraints.gridwidth = 2;
@@ -143,9 +137,9 @@ public class WaterLevelSimulationFrame extends JFrame {
         constraints.weightx = 0;
         constraints.weightx = 0;
         constraints.fill = GridBagConstraints.NONE;
-        constraints.insets = new Insets(10,10,10,10);
-        layout.setConstraints(lblTitle, constraints);
-        // Í¼±íÇø
+        constraints.insets = new Insets(10, 10, 10, 10);
+//        layout.setConstraints(lblTitle, constraints);
+        // å›¾è¡¨åŒº
         constraints.gridx = 0;
         constraints.gridy = 1;
         constraints.gridwidth = 1;
@@ -153,9 +147,9 @@ public class WaterLevelSimulationFrame extends JFrame {
         constraints.weightx = 1;
         constraints.weighty = 1;
         constraints.fill = GridBagConstraints.BOTH;
-        constraints.insets = new Insets(10,10,10,10);
-        layout.setConstraints(chart, constraints);
-        // ¿ØÖÆÇø
+        constraints.insets = new Insets(10, 10, 10, 10);
+        layout.setConstraints(playerPanel, constraints);
+        // æ§åˆ¶åŒº
         constraints.gridx = 0;
         constraints.gridy = 2;
         constraints.gridwidth = 2;
@@ -163,9 +157,9 @@ public class WaterLevelSimulationFrame extends JFrame {
         constraints.weightx = 1;
         constraints.weighty = 0;
         constraints.fill = GridBagConstraints.NONE;
-        constraints.insets = new Insets(10,10,10,10);
+        constraints.insets = new Insets(10, 10, 10, 10);
         layout.setConstraints(controlPanel, constraints);
-        // ×´Ì¬Çø
+        // çŠ¶æ€åŒº
         constraints.gridx = 1;
         constraints.gridy = 0;
         constraints.gridwidth = 0;
@@ -173,24 +167,23 @@ public class WaterLevelSimulationFrame extends JFrame {
         constraints.weightx = 0;
         constraints.weighty = 0;
         constraints.fill = GridBagConstraints.NONE;
-        constraints.insets = new Insets(10,10,10,10);
+        constraints.insets = new Insets(10, 10, 10, 10);
         layout.setConstraints(statusPanel, constraints);
 
         this.setLayout(layout);
     }
 
     public WaterLevelSimulationFrame(TreeMap<Integer, Section> sectionMap) {
+        this.setTitle("æ²³é“æ–­é¢æ°´ä½-æ—¶é—´åŠ¨æ€æ¼”ç¤º");
         this.sectionMap = sectionMap;
 
-        // ½«µ±Ç°¶ÏÃæÖÃÎªMapÖĞµÄµÚÒ»¸ö¶ÏÃæ
-        // TODO: Ä¿Ç°Ö»ÓĞ¶ÏÃæ2µÄË®Î»Êı¾İ£¬ËùÒÔ³õÊ¼×´Ì¬Ñ¡ÓÃ2¶ÏÃæÒÔ¹©²âÊÔ
+        // å°†å½“å‰æ–­é¢ç½®ä¸ºMapä¸­çš„ç¬¬ä¸€ä¸ªæ–­é¢
+        // TODO: ç›®å‰åªæœ‰æ–­é¢2çš„æ°´ä½æ•°æ®ï¼Œæ‰€ä»¥åˆå§‹çŠ¶æ€é€‰ç”¨2æ–­é¢ä»¥ä¾›æµ‹è¯•
         section = sectionMap.get(2);
+        player = new Player(section.getPoints(), section.getWaterLevelItems());
 
-        // ³õÊ¼»¯Í¼ĞÎ×é¼ş
+        // åˆå§‹åŒ–å›¾å½¢ç»„ä»¶
         InitComponents();
-
-        // ÖØÖÃ¶ÏÃæ×´Ì¬
-        ResetSectionStatus();
     }
 }
 
