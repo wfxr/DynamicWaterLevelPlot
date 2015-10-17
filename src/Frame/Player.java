@@ -1,6 +1,7 @@
 package Frame;
 
 import Data.MPoint;
+import Data.Section;
 import Data.WaterLevelItem;
 import org.jfree.chart.*;
 import org.jfree.chart.ChartPanel;
@@ -8,9 +9,11 @@ import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
+import org.jfree.chart.title.TextTitle;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
+import org.jfree.ui.HorizontalAlignment;
 
 import javax.swing.*;
 import java.awt.*;
@@ -35,6 +38,12 @@ public class Player {
     private Timer timer;
     private Status status;
     private ArrayList<PlayerListener> playerListenerList = new ArrayList<>();
+
+    private XYSeries sectionSeries;
+    private XYSeries waterSeries;
+
+    private TextTitle dateTitle;
+    private TextTitle waterLevelTitle;
 
     public boolean IsStopped() {
         return status == Status.Stopped;
@@ -94,8 +103,8 @@ public class Player {
     private void UpdateWaterLevel(WaterLevelItem waterLevelItem) {
         waterSeries.update(sectionSeries.getMinX(), waterLevelItem.WaterLevel);
         waterSeries.update(sectionSeries.getMaxX(), waterLevelItem.WaterLevel);
-        DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss yyyy-MM-dd a");
-        chart.getTitle().setText(dateFormat.format(waterLevelItem.Time));
+        dateTitle.setText(new SimpleDateFormat("HH:mm:ss yyyy-MM-dd a").format(waterLevelItem.Time));
+        waterLevelTitle.setText("当前水位：" + String.format("%8.2f",waterLevelItem.WaterLevel));
     }
 
     ActionListener timerListener = new ActionListener() {
@@ -125,35 +134,52 @@ public class Player {
         status = Status.Stopped;
     }
 
-    private XYSeries sectionSeries;
-    private XYSeries waterSeries;
 
     public JPanel createPlayerPanel() {
         ChartPanel chartPanel = new ChartPanel(chart, true, true, true, false, true);
-//        chartPanel.add(new JSlider());
+        chartPanel.setMouseZoomable(false);
         return chartPanel;
     }
 
-    public Player(List<MPoint> sectionPoints, List<WaterLevelItem> waterLevelItems) {
-        this.sectionPoints = sectionPoints;
-        this.waterLevelItems = waterLevelItems;
+    public Player() {
+        this.timer = new Timer(100, timerListener);
+        this.dateTitle = new TextTitle();
+        this.waterLevelTitle = new TextTitle();
+        this.chart = ChartFactory.createXYAreaChart("", "横向位置(m)", "高程(m)",
+                null, PlotOrientation.VERTICAL, true, true, true);
+        // 日期信息作为主标题
+        chart.setTitle(dateTitle);
+
+        // 水位信息作为副标题
+        waterLevelTitle.setHorizontalAlignment(HorizontalAlignment.RIGHT);
+        waterLevelTitle.setPadding(0,0,0,60);
+        waterLevelTitle.setFont(new Font("黑体", Font.PLAIN, 14));
+        chart.addSubtitle(0, waterLevelTitle);
+    }
+
+    public void setSection(Section section) {
+        timer.stop();
+
+        this.sectionPoints = section.getPoints();
+        this.waterLevelItems = section.getWaterLevelItems();
         this.waterLevelIter = waterLevelItems.listIterator();
         this.status = Status.Stopped;
 
-        this.timer = new Timer(100, timerListener);
         this.sectionSeries = new XYSeries("断面");
         this.waterSeries = new XYSeries("水位");
 
-        this.chart = createChart(createDataset());
+        updateChart();
 
         // 默认显示第一帧的画面
         FrameForward();
     }
 
-    private JFreeChart createChart(XYDataset dataset) {
-        JFreeChart chart = ChartFactory.createXYAreaChart(
-                "断面水位-关系图", "横向位置(m)", "高程(m)", dataset, PlotOrientation.VERTICAL, true, true, true);
-        XYPlot plot = (XYPlot) chart.getPlot();
+    private void updateChart() {
+        waterLevelTitle.setText("无水位数据");
+        dateTitle.setText("无日期数据");
+
+        XYPlot plot = chart.getXYPlot();
+        plot.setDataset(createDataset());
         plot.setForegroundAlpha(1.0F);
 
         // 域(x)坐标轴
@@ -178,21 +204,22 @@ public class Player {
 
         // 断面和水体的颜色
         XYItemRenderer renderer = plot.getRenderer();
+//        renderer.setSeriesPaint(0, new Color(132, 57, 0));
         renderer.setSeriesPaint(0, Color.darkGray);
-        renderer.setSeriesPaint(1, Color.blue);
+        renderer.setSeriesPaint(1, new Color(0, 0, 255));
 
         // 标题和图例的字体
         chart.getTitle().setFont(new Font("黑体", Font.BOLD, 18));
 
-        // 不显示图例
+        // 图例
         chart.removeLegend();
-
+        // 背景
         chart.setBackgroundPaint(null);
-
-        return chart;
     }
 
     private XYDataset createDataset() {
+        sectionSeries.clear();
+        waterSeries.clear();
         for (MPoint point : sectionPoints)
             sectionSeries.add(point.x, point.y);
         waterSeries.add(sectionSeries.getMinX(), 0);

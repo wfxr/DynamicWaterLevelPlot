@@ -1,0 +1,15 @@
+<component name="ArtifactManager">
+  <artifact name="WaterLevelSimulation:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/WaterLevelSimulation_jar</output-path>
+    <root id="root">
+      <element id="archive" name="WaterLevelSimulation.jar">
+        <element id="module-output" name="WaterLevelSimulation" />
+      </element>
+      <element id="directory" name="lib">
+        <element id="library" level="project" name="jcommon-1.0.23" />
+        <element id="library" level="project" name="jfreechart-1.0.19" />
+        <element id="library" level="project" name="poi-3.13-20150929" />
+      </element>
+    </root>
+  </artifact>
+</component>

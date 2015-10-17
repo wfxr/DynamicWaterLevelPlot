@@ -1,11 +1,14 @@
 package Frame;
 
 import Data.Section;
+import org.jfree.chart.ChartPanel;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.*;
 
 /**
@@ -14,10 +17,13 @@ import java.util.*;
 public class WaterLevelSimulationFrame extends JFrame {
     private TreeMap<Integer, Section> sectionMap;
     private Section section;  // 当前断面
+    private Player player;
 
     private GridBagLayout layout;
     private JPanel controlPanel;
     private JPanel statusPanel;
+    private JPanel playerPanel;
+    private JPanel optionPanel;
 
 //    private JLabel lblTitle;
 
@@ -27,13 +33,19 @@ public class WaterLevelSimulationFrame extends JFrame {
     private JButton btnExit;
     private JButton btnStop;
 
-    private Player player;
-    private JPanel playerPanel;
+    private JComboBox cbxSection;
 
     ActionListener exitListener = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
             Exit();
+        }
+    };
+
+    ActionListener setSectionListener =  new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            SetSection(sectionMap.get(cbxSection.getSelectedItem()));
         }
     };
 
@@ -52,7 +64,7 @@ public class WaterLevelSimulationFrame extends JFrame {
                 player.Play();
             } else if (player.IsPlaying()) {
                 player.Pause();
-                btnSwitch.setText("播放");
+                btnSwitch.setText("运行");
             }
         }
     };
@@ -61,7 +73,7 @@ public class WaterLevelSimulationFrame extends JFrame {
         @Override
         public void actionPerformed(ActionEvent e) {
             player.Stop();
-            btnSwitch.setText("播放");
+            btnSwitch.setText("运行");
         }
     };
 
@@ -81,9 +93,14 @@ public class WaterLevelSimulationFrame extends JFrame {
 
         @Override
         public void performOnFinish() {
-            btnSwitch.setText("播放");
+            btnSwitch.setText("运行");
         }
     };
+
+    private void SetSection(Section section){
+        this.section = section;
+        player.setSection(section);
+    }
 
     private void Exit() {
         System.exit(0);
@@ -91,16 +108,20 @@ public class WaterLevelSimulationFrame extends JFrame {
 
     public void InitComponents() {
 //        lblTitle = new JLabel("水位-时间模拟");
+        optionPanel = new JPanel();
         controlPanel = new JPanel();
         playerPanel = player.createPlayerPanel();
         statusPanel = new JPanel();
 
-        btnSwitch = new JButton("播放");
+        cbxSection = new JComboBox();
+
+        btnSwitch = new JButton("运行");
         btnFrameForward = new JButton("下一帧");
         btnFrameBackward = new JButton("上一帧");
         btnStop = new JButton("停止");
         btnExit = new JButton("退出");
 
+        cbxSection.addActionListener(setSectionListener);
         btnSwitch.addActionListener(switchListener);
         btnFrameForward.addActionListener(frameForwardListener);
         btnFrameBackward.addActionListener(frameBackwardListener);
@@ -108,6 +129,9 @@ public class WaterLevelSimulationFrame extends JFrame {
         btnExit.addActionListener(exitListener);
 
         player.addPlayerListenerList(playerListener);
+
+        optionPanel.add(new JLabel("选择断面："));
+        optionPanel.add(cbxSection);
 
         controlPanel.add(btnSwitch);
         controlPanel.add(btnFrameForward);
@@ -117,7 +141,7 @@ public class WaterLevelSimulationFrame extends JFrame {
 
         statusPanel.add(new JLabel("Status Area"));
 
-//        this.add(lblTitle);
+        this.add(optionPanel);
         this.add(playerPanel);
         this.add(controlPanel);
         // TODO:添加状态区
@@ -129,16 +153,17 @@ public class WaterLevelSimulationFrame extends JFrame {
     public void SetLayout() {
         layout = new GridBagLayout();
         GridBagConstraints constraints = new GridBagConstraints();
-        // 标题区
+        // 选项区
         constraints.gridx = 0;
         constraints.gridy = 0;
-        constraints.gridwidth = 2;
+        constraints.gridwidth = 1;
         constraints.gridheight = 1;
         constraints.weightx = 0;
         constraints.weightx = 0;
         constraints.fill = GridBagConstraints.NONE;
-        constraints.insets = new Insets(10, 10, 10, 10);
-//        layout.setConstraints(lblTitle, constraints);
+        constraints.insets = new Insets(10, 10, 0, 10);
+        constraints.anchor = GridBagConstraints.WEST;
+        layout.setConstraints(optionPanel, constraints);
         // 图表区
         constraints.gridx = 0;
         constraints.gridy = 1;
@@ -147,7 +172,8 @@ public class WaterLevelSimulationFrame extends JFrame {
         constraints.weightx = 1;
         constraints.weighty = 1;
         constraints.fill = GridBagConstraints.BOTH;
-        constraints.insets = new Insets(10, 10, 10, 10);
+        constraints.insets = new Insets(0, 10, 10, 10);
+        constraints.anchor = GridBagConstraints.CENTER;
         layout.setConstraints(playerPanel, constraints);
         // 控制区
         constraints.gridx = 0;
@@ -158,6 +184,7 @@ public class WaterLevelSimulationFrame extends JFrame {
         constraints.weighty = 0;
         constraints.fill = GridBagConstraints.NONE;
         constraints.insets = new Insets(10, 10, 10, 10);
+        constraints.anchor = GridBagConstraints.CENTER;
         layout.setConstraints(controlPanel, constraints);
         // 状态区
         constraints.gridx = 1;
@@ -173,17 +200,24 @@ public class WaterLevelSimulationFrame extends JFrame {
         this.setLayout(layout);
     }
 
+    public void LoadSectionComboBox(){
+        DefaultComboBoxModel model = new DefaultComboBoxModel<>(sectionMap.keySet().toArray());
+        cbxSection.setModel(model);
+    }
+
     public WaterLevelSimulationFrame(TreeMap<Integer, Section> sectionMap) {
         this.setTitle("河道断面水位-时间动态演示");
         this.sectionMap = sectionMap;
 
-        // 将当前断面置为Map中的第一个断面
-        // TODO: 目前只有断面2的水位数据，所以初始状态选用2断面以供测试
-        section = sectionMap.get(2);
-        player = new Player(section.getPoints(), section.getWaterLevelItems());
+        player = new Player();
 
         // 初始化图形组件
         InitComponents();
+
+        // 加载断面编号到组合框
+        LoadSectionComboBox();
+        // TODO: 目前只有断面2的水位数据，所以初始状态选用2断面以供测试
+        cbxSection.setSelectedItem(2);
     }
 }
 
