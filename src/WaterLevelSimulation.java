@@ -45,8 +45,8 @@ public class WaterLevelSimulation {
     }
 
     public static void main(String[] args) throws IOException, ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException {
-        // 设置显示风格
-        initGlobalFontSetting(new Font("宋体", Font.PLAIN, 14));
+        // 璁剧疆鏄剧ず椋庢牸
+        initGlobalFontSetting(new Font("瀹嬩綋", Font.PLAIN, 14));
         UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName());
 
         WaterLevelSimulation wls = new WaterLevelSimulation();
