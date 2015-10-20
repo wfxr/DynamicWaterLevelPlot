@@ -1,82 +1,26 @@
-package Frame;
+package UI;
 
 import Data.Section;
-import org.jfree.chart.ChartPanel;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.util.*;
+import java.util.TreeMap;
 
 /**
- * Created by Wenxu on 2015/10/14.
+ * Created by Wenxuan on 2015/10/14.
  */
-public class WaterLevelSimulationFrame extends JFrame {
-    private TreeMap<Integer, Section> sectionMap;
-    private Section section;  // 当前断面
-    private Player player;
-
-    private GridBagLayout layout;
-    private JPanel controlPanel;
-    private JPanel statusPanel;
-    private JPanel playerPanel;
-    private JPanel optionPanel;
-
-//    private JLabel lblTitle;
-
-    private JButton btnSwitch;
-    private JButton btnFrameForward;
-    private JButton btnFrameBackward;
-    private JButton btnExit;
-    private JButton btnStop;
-
-    private JComboBox cbxSection;
-
+public class MainFrame extends JFrame {
     ActionListener exitListener = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
             Exit();
         }
     };
-
-    ActionListener setSectionListener =  new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            SetSection(sectionMap.get(cbxSection.getSelectedItem()));
-        }
-    };
-
-    ActionListener switchListener = new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            if (player.IsStopped()){
-                player.Play();
-                btnSwitch.setText("暂停");
-            }else if(player.IsFinished()) {
-                player.Stop();
-                player.Play();
-                btnSwitch.setText("暂停");
-            } else if (player.IsPaused()) {
-                btnSwitch.setText("暂停");
-                player.Play();
-            } else if (player.IsPlaying()) {
-                player.Pause();
-                btnSwitch.setText("运行");
-            }
-        }
-    };
-
-    ActionListener stopListener = new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            player.Stop();
-            btnSwitch.setText("运行");
-        }
-    };
-
+    private TreeMap<Integer, Section> sectionMap;
+    private Section section;  // 当前断面
+    private Player player;
     ActionListener frameForwardListener = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -89,6 +33,40 @@ public class WaterLevelSimulationFrame extends JFrame {
             player.FrameBackward();
         }
     };
+    private GridBagLayout layout;
+    private JPanel controlPanel;
+
+//    private JLabel lblTitle;
+private JPanel statusPanel;
+    private JPanel playerPanel;
+    private JPanel optionPanel;
+    private JButton btnSwitch;
+    ActionListener switchListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (player.IsStopped()) {
+                player.Play();
+                btnSwitch.setText("暂停");
+            } else if (player.IsFinished()) {
+                player.Stop();
+                player.Play();
+                btnSwitch.setText("暂停");
+            } else if (player.IsPaused()) {
+                btnSwitch.setText("暂停");
+                player.Play();
+            } else if (player.IsPlaying()) {
+                player.Pause();
+                btnSwitch.setText("运行");
+            }
+        }
+    };
+    ActionListener stopListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            player.Stop();
+            btnSwitch.setText("运行");
+        }
+    };
     PlayerListener playerListener = new PlayerListener() {
 
         @Override
@@ -96,6 +74,34 @@ public class WaterLevelSimulationFrame extends JFrame {
             btnSwitch.setText("运行");
         }
     };
+    private JButton btnFrameForward;
+    private JButton btnFrameBackward;
+    private JButton btnExit;
+    private JButton btnStop;
+    private JComboBox cbxSection;
+    ActionListener setSectionListener =  new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            SetSection(sectionMap.get(cbxSection.getSelectedItem()));
+        }
+    };
+
+    public MainFrame(TreeMap<Integer, Section> sectionMap) {
+        this.setTitle("河道断面动态水位演示");
+        this.sectionMap = sectionMap;
+
+        player = new Player();
+
+        // 初始化图形组件
+        InitComponents();
+
+        // 加载断面编号到组合框
+        LoadSectionComboBox();
+
+        // 默认展示第一个断面
+        if (cbxSection.getItemCount() != 0)
+            cbxSection.setSelectedIndex(0);
+    }
 
     private void SetSection(Section section){
         this.section = section;
@@ -203,21 +209,6 @@ public class WaterLevelSimulationFrame extends JFrame {
     public void LoadSectionComboBox(){
         DefaultComboBoxModel model = new DefaultComboBoxModel<>(sectionMap.keySet().toArray());
         cbxSection.setModel(model);
-    }
-
-    public WaterLevelSimulationFrame(TreeMap<Integer, Section> sectionMap) {
-        this.setTitle("河道断面水位-时间动态演示");
-        this.sectionMap = sectionMap;
-
-        player = new Player();
-
-        // 初始化图形组件
-        InitComponents();
-
-        // 加载断面编号到组合框
-        LoadSectionComboBox();
-        // TODO: 目前只有断面2的水位数据，所以初始状态选用2断面以供测试
-        cbxSection.setSelectedItem(2);
     }
 }
 

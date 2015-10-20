@@ -1,6 +1,8 @@
+package Demo;
+
 import Data.Section;
 import Data.SectionMapHelper;
-import Frame.WaterLevelSimulationFrame;
+import UI.MainFrame;
 
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
@@ -10,28 +12,14 @@ import java.util.Enumeration;
 import java.util.TreeMap;
 
 /**
- * Created by Wenxu on 2015/10/14.
+ * Created by Wenxuan on 2015/10/14.
  */
-public class WaterLevelSimulation {
+public class SectionDynamicWaterLevelPlot {
     private TreeMap<Integer, Section> sectionPoints;
-    private WaterLevelSimulationFrame frame;
+    private MainFrame frame;
 
-    public void ShowFrame() {
-        frame = new WaterLevelSimulationFrame(sectionPoints);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(800, 600);
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
-    }
-
-    public WaterLevelSimulation() {
+    public SectionDynamicWaterLevelPlot() {
         sectionPoints = new TreeMap<>();
-    }
-
-    public void LoadData(String sectionsXlsPath, String waterLevelsXlsPath) throws IOException {
-        sectionPoints = new TreeMap<>();
-        SectionMapHelper.LoadMeasurementPointsFromXls(sectionPoints, sectionsXlsPath);
-        SectionMapHelper.LoadWaterLevelsFromXls(sectionPoints, waterLevelsXlsPath);
     }
 
     public static void initGlobalFontSetting(Font fnt) {
@@ -46,11 +34,25 @@ public class WaterLevelSimulation {
 
     public static void main(String[] args) throws IOException, ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException {
         // 设置显示风格
-        initGlobalFontSetting(new Font("宋体", Font.PLAIN, 14));
-        UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName());
+        initGlobalFontSetting(new Font("微软雅黑", Font.PLAIN, 16));
+        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 
-        WaterLevelSimulation wls = new WaterLevelSimulation();
+        SectionDynamicWaterLevelPlot wls = new SectionDynamicWaterLevelPlot();
         wls.LoadData("testdata/Sections.xls", "testdata/WaterLevels.xls");
         wls.ShowFrame();
+    }
+
+    public void ShowFrame() {
+        frame = new MainFrame(sectionPoints);
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        frame.setSize(800, 600);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+    }
+
+    public void LoadData(String sectionsXlsPath, String waterLevelsXlsPath) throws IOException {
+        sectionPoints = new TreeMap<>();
+        SectionMapHelper.LoadMeasurementPointsFromXls(sectionPoints, sectionsXlsPath);
+        SectionMapHelper.LoadWaterLevelsFromXls(sectionPoints, waterLevelsXlsPath);
     }
 }

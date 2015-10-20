@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/WaterLevelSimulation.iml" filepath="$PROJECT_DIR$/WaterLevelSimulation.iml" />
+      <module fileurl="file://$PROJECT_DIR$/DynamicWaterLevelPlot.iml" filepath="$PROJECT_DIR$/DynamicWaterLevelPlot.iml" />
     </modules>
   </component>
 </project>
