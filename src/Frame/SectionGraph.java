@@ -8,23 +8,23 @@ import java.awt.geom.Line2D;
 import java.util.TreeSet;
 
 public class SectionGraph {
-    private double[] xSeries;   // ¶ÏÃæÊı¾İxÏµÁĞ
-    private double[] ySeries;   // ¶ÏÃæÊı¾İyÏµÁĞ
-    private double waterLevel;  // Ë®Î»Öµ
+    private double[] xSeries;   // æ–­é¢æ•°æ®xç³»åˆ—
+    private double[] ySeries;   // æ–­é¢æ•°æ®yç³»åˆ—
+    private double waterLevel;  // æ°´ä½å€¼
 
-    private int sectionDataCount;  // ¶ÏÃæÊı¾İ¸öÊı
+    private int sectionDataCount;  // æ–­é¢æ•°æ®ä¸ªæ•°
 
-    private Color sectionColor; // ¶ÏÃæÑÕÉ«
-    private Color waterColor;   // Ë®ÌåÑÕÉ«
-    private Color axisColor;    // ×ø±êÖáÑÕÉ«
+    private Color sectionColor; // æ–­é¢é¢œè‰²
+    private Color waterColor;   // æ°´ä½“é¢œè‰²
+    private Color axisColor;    // åæ ‡è½´é¢œè‰²
 
-    private Rectangle2D bounds; // Ô­Ê¼Êı¾İ±ß½ç
+    private Rectangle2D bounds; // åŸå§‹æ•°æ®è¾¹ç•Œ
 
-    private int sectionWidth;  // ¶ÏÃæ¿í¶È
-    private int sectionHeight; // ¶ÏÃæ¸ß¶È
+    private int sectionWidth;  // æ–­é¢å®½åº¦
+    private int sectionHeight; // æ–­é¢é«˜åº¦
 
-    private int width;      // Í¼±í¿í¶È
-    private int height;     // Í¼±í¸ß¶È
+    private int width;      // å›¾è¡¨å®½åº¦
+    private int height;     // å›¾è¡¨é«˜åº¦
 
     private Polygon section;
     private Polygon water;
@@ -44,7 +44,7 @@ public class SectionGraph {
     }
 
     public void setSectionData(TreeSet<MPoint> points) {
-        // ½«pointsÖĞµÄÊı¾İ´æ´¢µ½xSeriesºÍySeries
+        // å°†pointsä¸­çš„æ•°æ®å­˜å‚¨åˆ°xSerieså’ŒySeries
         sectionDataCount = points.size();
         xSeries = new double[sectionDataCount];
         ySeries = new double[sectionDataCount];
@@ -96,7 +96,7 @@ public class SectionGraph {
     }
 
     private void updateSection() {
-        int npoint = sectionDataCount + 2;  // ¶ÏÃæ¶à±ßĞÎ¶¥µãÊı
+        int npoint = sectionDataCount + 2;  // æ–­é¢å¤šè¾¹å½¢é¡¶ç‚¹æ•°
         int[] xpoints = new int[npoint];
         int[] ypoints = new int[npoint];
         for (int i = 0; i < npoint - 2; ++i) {
@@ -104,10 +104,10 @@ public class SectionGraph {
             ypoints[i] = screenY(ySeries[i]);
         }
 
-        // ÓÒÏÂ½Çµã
+        // å³ä¸‹è§’ç‚¹
         xpoints[npoint - 2] = screenX(bounds.getMaxX());
         ypoints[npoint - 2] = screenY(bounds.getMinY());
-        // ×óÏÂ½Çµã
+        // å·¦ä¸‹è§’ç‚¹
         xpoints[npoint - 1] = screenX(bounds.getMinX());
         ypoints[npoint - 1] = screenY(bounds.getMinY());
 
@@ -144,7 +144,7 @@ public class SectionGraph {
         return 1 - (y - bounds.getMinY()) / bounds.getHeight();
     }
 
-    // ¸üĞÂ¶ÏÃæÊı¾İµÄ×ø±ê±ß½ç
+    // æ›´æ–°æ–­é¢æ•°æ®çš„åæ ‡è¾¹ç•Œ
     private void updateBounds() {
         double min_x, min_y, max_x, max_y;
         max_x = max_y = Double.MIN_VALUE;

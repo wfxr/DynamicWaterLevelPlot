@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding" defaultCharsetForPropertiesFiles="UTF-8">
+    <file url="file://$PROJECT_DIR$/src/Data/MPoint.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/Data/Section.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/Data/SectionMapHelper.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/Data/WaterLevelItem.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/Frame/Player.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/Frame/SectionGraph.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/Frame/WaterLevelSimulationFrame.java" charset="UTF-8" />
+    <file url="PROJECT" charset="UTF-8" />
+  </component>
+</project>

@@ -14,8 +14,8 @@ import java.util.*;
  */
 public class WaterLevelSimulationFrame extends JFrame {
     private TreeMap<Integer, Section> sectionMap;
-    private Section section;  // µ±Ç°¶ÏÃæ
-    private int waterLevelIndex;  // µ±Ç°Ë®Î»Ë÷Òı
+    private Section section;  // å½“å‰æ–­é¢
+    private int waterLevelIndex;  // å½“å‰æ°´ä½ç´¢å¼•
 
     private GridBagLayout layout;
     private JPanel controlPanel;
@@ -135,7 +135,7 @@ public class WaterLevelSimulationFrame extends JFrame {
     public void SetLayout(){
         layout = new GridBagLayout();
         GridBagConstraints constraints = new GridBagConstraints();
-        // ±êÌâÇø
+        // æ ‡é¢˜åŒº
         constraints.gridx = 0;
         constraints.gridy = 0;
         constraints.gridwidth = 2;
@@ -145,7 +145,7 @@ public class WaterLevelSimulationFrame extends JFrame {
         constraints.fill = GridBagConstraints.NONE;
         constraints.insets = new Insets(10,10,10,10);
         layout.setConstraints(lblTitle, constraints);
-        // Í¼±íÇø
+        // å›¾è¡¨åŒº
         constraints.gridx = 0;
         constraints.gridy = 1;
         constraints.gridwidth = 1;
@@ -155,7 +155,7 @@ public class WaterLevelSimulationFrame extends JFrame {
         constraints.fill = GridBagConstraints.BOTH;
         constraints.insets = new Insets(10,10,10,10);
         layout.setConstraints(chart, constraints);
-        // ¿ØÖÆÇø
+        // æ§åˆ¶åŒº
         constraints.gridx = 0;
         constraints.gridy = 2;
         constraints.gridwidth = 2;
@@ -165,7 +165,7 @@ public class WaterLevelSimulationFrame extends JFrame {
         constraints.fill = GridBagConstraints.NONE;
         constraints.insets = new Insets(10,10,10,10);
         layout.setConstraints(controlPanel, constraints);
-        // ×´Ì¬Çø
+        // çŠ¶æ€åŒº
         constraints.gridx = 1;
         constraints.gridy = 0;
         constraints.gridwidth = 0;
@@ -182,14 +182,14 @@ public class WaterLevelSimulationFrame extends JFrame {
     public WaterLevelSimulationFrame(TreeMap<Integer, Section> sectionMap) {
         this.sectionMap = sectionMap;
 
-        // ½«µ±Ç°¶ÏÃæÖÃÎªMapÖĞµÄµÚÒ»¸ö¶ÏÃæ
-        // TODO: Ä¿Ç°Ö»ÓĞ¶ÏÃæ2µÄË®Î»Êı¾İ£¬ËùÒÔ³õÊ¼×´Ì¬Ñ¡ÓÃ2¶ÏÃæÒÔ¹©²âÊÔ
+        // å°†å½“å‰æ–­é¢ç½®ä¸ºMapä¸­çš„ç¬¬ä¸€ä¸ªæ–­é¢
+        // TODO: ç›®å‰åªæœ‰æ–­é¢2çš„æ°´ä½æ•°æ®ï¼Œæ‰€ä»¥åˆå§‹çŠ¶æ€é€‰ç”¨2æ–­é¢ä»¥ä¾›æµ‹è¯•
         section = sectionMap.get(2);
 
-        // ³õÊ¼»¯Í¼ĞÎ×é¼ş
+        // åˆå§‹åŒ–å›¾å½¢ç»„ä»¶
         InitComponents();
 
-        // ÖØÖÃ¶ÏÃæ×´Ì¬
+        // é‡ç½®æ–­é¢çŠ¶æ€
         ResetSectionStatus();
     }
 }

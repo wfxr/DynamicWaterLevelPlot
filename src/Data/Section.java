@@ -6,8 +6,8 @@ import java.util.*;
  * Created by Wenxu on 2015/10/14.
  */
 public class Section {
-    private TreeSet<MPoint> points; // 断面测点高程数据
-    private List<WaterLevelItem> waterLevels; // 时间-水位数据
+    private TreeSet<MPoint> points; // 鏂潰娴嬬偣楂樼▼鏁版嵁
+    private List<WaterLevelItem> waterLevels; // 鏃堕棿-姘翠綅鏁版嵁
 
     public Section() {
         this.points = new TreeSet<>();
