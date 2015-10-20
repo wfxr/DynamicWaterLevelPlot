@@ -1,0 +1,11 @@
+<component name="ArtifactManager">
+  <artifact name="WaterLevelSimulation:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/WaterLevelSimulation_jar</output-path>
+    <root id="root">
+      <element id="archive" name="WaterLevelSimulation.jar">
+        <element id="module-output" name="WaterLevelSimulation" />
+      </element>
+      <element id="directory" name="lib" />
+    </root>
+  </artifact>
+</component>

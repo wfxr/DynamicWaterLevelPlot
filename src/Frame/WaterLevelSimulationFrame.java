@@ -1,170 +1,223 @@
 package Frame;
 
-import Data.MPoint;
 import Data.Section;
-import Data.WaterLevelItem;
+import org.jfree.chart.ChartPanel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.*;
-import java.util.List;
 
 /**
  * Created by Wenxu on 2015/10/14.
  */
 public class WaterLevelSimulationFrame extends JFrame {
     private TreeMap<Integer, Section> sectionMap;
-    private Section currentSection;
-    private int currentWaterLevelIndex;
+    private Section section;  // 当前断面
+    private Player player;
 
-    private Section getCurrentSection() {
-        return currentSection;
+    private GridBagLayout layout;
+    private JPanel controlPanel;
+    private JPanel statusPanel;
+    private JPanel playerPanel;
+    private JPanel optionPanel;
+
+//    private JLabel lblTitle;
+
+    private JButton btnSwitch;
+    private JButton btnFrameForward;
+    private JButton btnFrameBackward;
+    private JButton btnExit;
+    private JButton btnStop;
+
+    private JComboBox cbxSection;
+
+    ActionListener exitListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            Exit();
+        }
+    };
+
+    ActionListener setSectionListener =  new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            SetSection(sectionMap.get(cbxSection.getSelectedItem()));
+        }
+    };
+
+    ActionListener switchListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (player.IsStopped()){
+                player.Play();
+                btnSwitch.setText("暂停");
+            }else if(player.IsFinished()) {
+                player.Stop();
+                player.Play();
+                btnSwitch.setText("暂停");
+            } else if (player.IsPaused()) {
+                btnSwitch.setText("暂停");
+                player.Play();
+            } else if (player.IsPlaying()) {
+                player.Pause();
+                btnSwitch.setText("运行");
+            }
+        }
+    };
+
+    ActionListener stopListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            player.Stop();
+            btnSwitch.setText("运行");
+        }
+    };
+
+    ActionListener frameForwardListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            player.FrameForward();
+        }
+    };
+    ActionListener frameBackwardListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            player.FrameBackward();
+        }
+    };
+    PlayerListener playerListener = new PlayerListener() {
+
+        @Override
+        public void performOnFinish() {
+            btnSwitch.setText("运行");
+        }
+    };
+
+    private void SetSection(Section section){
+        this.section = section;
+        player.setSection(section);
     }
 
-    private void setCurrentSection(int sectionId) {
-        currentSection = sectionMap.get(sectionId);
+    private void Exit() {
+        System.exit(0);
     }
 
-    private List<WaterLevelItem> currentWaterLevelGroup() {
-        return currentSection.getWaterGroup();
+    public void InitComponents() {
+//        lblTitle = new JLabel("水位-时间模拟");
+        optionPanel = new JPanel();
+        controlPanel = new JPanel();
+        playerPanel = player.createPlayerPanel();
+        statusPanel = new JPanel();
+
+        cbxSection = new JComboBox();
+
+        btnSwitch = new JButton("运行");
+        btnFrameForward = new JButton("下一帧");
+        btnFrameBackward = new JButton("上一帧");
+        btnStop = new JButton("停止");
+        btnExit = new JButton("退出");
+
+        cbxSection.addActionListener(setSectionListener);
+        btnSwitch.addActionListener(switchListener);
+        btnFrameForward.addActionListener(frameForwardListener);
+        btnFrameBackward.addActionListener(frameBackwardListener);
+        btnStop.addActionListener(stopListener);
+        btnExit.addActionListener(exitListener);
+
+        player.addPlayerListenerList(playerListener);
+
+        optionPanel.add(new JLabel("选择断面："));
+        optionPanel.add(cbxSection);
+
+        controlPanel.add(btnSwitch);
+        controlPanel.add(btnFrameForward);
+        controlPanel.add(btnFrameBackward);
+        controlPanel.add(btnStop);
+        controlPanel.add(btnExit);
+
+        statusPanel.add(new JLabel("Status Area"));
+
+        this.add(optionPanel);
+        this.add(playerPanel);
+        this.add(controlPanel);
+        // TODO:添加状态区
+//        this.add(statusPanel);
+
+        SetLayout();
     }
 
-    private WaterLevelItem CurrentWaterLevelItem() {
-        return currentWaterLevelGroup().get(currentWaterLevelIndex);
+    public void SetLayout() {
+        layout = new GridBagLayout();
+        GridBagConstraints constraints = new GridBagConstraints();
+        // 选项区
+        constraints.gridx = 0;
+        constraints.gridy = 0;
+        constraints.gridwidth = 1;
+        constraints.gridheight = 1;
+        constraints.weightx = 0;
+        constraints.weightx = 0;
+        constraints.fill = GridBagConstraints.NONE;
+        constraints.insets = new Insets(10, 10, 0, 10);
+        constraints.anchor = GridBagConstraints.WEST;
+        layout.setConstraints(optionPanel, constraints);
+        // 图表区
+        constraints.gridx = 0;
+        constraints.gridy = 1;
+        constraints.gridwidth = 1;
+        constraints.gridheight = 1;
+        constraints.weightx = 1;
+        constraints.weighty = 1;
+        constraints.fill = GridBagConstraints.BOTH;
+        constraints.insets = new Insets(0, 10, 10, 10);
+        constraints.anchor = GridBagConstraints.CENTER;
+        layout.setConstraints(playerPanel, constraints);
+        // 控制区
+        constraints.gridx = 0;
+        constraints.gridy = 2;
+        constraints.gridwidth = 2;
+        constraints.gridheight = 1;
+        constraints.weightx = 1;
+        constraints.weighty = 0;
+        constraints.fill = GridBagConstraints.NONE;
+        constraints.insets = new Insets(10, 10, 10, 10);
+        constraints.anchor = GridBagConstraints.CENTER;
+        layout.setConstraints(controlPanel, constraints);
+        // 状态区
+        constraints.gridx = 1;
+        constraints.gridy = 0;
+        constraints.gridwidth = 0;
+        constraints.gridheight = 3;
+        constraints.weightx = 0;
+        constraints.weighty = 0;
+        constraints.fill = GridBagConstraints.NONE;
+        constraints.insets = new Insets(10, 10, 10, 10);
+        layout.setConstraints(statusPanel, constraints);
+
+        this.setLayout(layout);
     }
 
-    // ǰ��һ֡
-    public boolean Forward() {
-        if (currentWaterLevelIndex == currentWaterLevelGroup().size() - 1)
-            return false;
-        ++currentWaterLevelIndex;
-        return true;
-    }
-
-    // ����һ֡
-    public boolean Backward() {
-        if (currentWaterLevelIndex == 0)
-            return false;
-        --currentWaterLevelIndex;
-        return true;
+    public void LoadSectionComboBox(){
+        DefaultComboBoxModel model = new DefaultComboBoxModel<>(sectionMap.keySet().toArray());
+        cbxSection.setModel(model);
     }
 
     public WaterLevelSimulationFrame(TreeMap<Integer, Section> sectionMap) {
+        this.setTitle("河道断面水位-时间动态演示");
         this.sectionMap = sectionMap;
-        Initialize();
 
-        ChartPanel chartPanel = new ChartPanel();
-        SectionCurve curve = new SectionCurve(currentSection.getPoints());
-        chartPanel.setCurve(curve);
-        getContentPane().add(chartPanel);
-    }
+        player = new Player();
 
-    private void Initialize() {
-        // ����ǰ������ΪMap�еĵ�һ������
-        currentSection = sectionMap.firstEntry().getValue();
-    }
-}
+        // 初始化图形组件
+        InitComponents();
 
-class ChartPanel extends JPanel {
-    private SectionCurve curve;
-    private double waterLevel;
-
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        Graphics2D g2d = (Graphics2D) g;
-        g2d.setStroke(new BasicStroke(3.0f));
-        g2d.setColor(Color.darkGray);
-        paintSectionCurve(g2d);
-    }
-
-    private void paintSectionCurve(Graphics2D g2d) {
-        curve.setSize(getWidth(), getHeight());
-        g2d.drawPolyline(curve.getXSeries(), curve.getYSeries(), curve.getPointsCount());
-    }
-
-    private void paintWaterLevelLine(Graphics2D g2d){
-
-
-    }
-
-    public void setCurve(SectionCurve curve) {
-        this.curve = curve;
+        // 加载断面编号到组合框
+        LoadSectionComboBox();
+        // TODO: 目前只有断面2的水位数据，所以初始状态选用2断面以供测试
+        cbxSection.setSelectedItem(2);
     }
 }
 
-class SectionCurve {
-    private TreeSet<MPoint> points;
-    private int[][] screenXy; // screenXy[0]Ϊx���깹�ɵ����飬screenXy[1]Ϊy���깹�ɵ�����
-    private double left;
-    private double bottom;
-    private double right;
-    private double top;
-    private int width;
-    private int height;
-
-    public int[] getXSeries() {
-        return screenXy[0];
-    }
-
-    public int[] getYSeries() {
-        return screenXy[1];
-    }
-
-    public SectionCurve(TreeSet<MPoint> points) {
-        setPoints(points);
-        setSize(0, 0);
-    }
-
-    private void updateScreenXy() {
-        int i = 0;
-        for (MPoint mPoint : points) {
-            screenXy[0][i] = screenX(mPoint.x, width);
-            screenXy[1][i] = screenY(mPoint.y, height);
-            ++i;
-        }
-    }
-
-    private int screenX(double x, int width) {
-        return (int) ((x - left) * width / (right - left));
-    }
-
-    private int screenY(double y, int height) {
-        return height - (int) ((y - bottom) * height / (top - bottom));
-    }
-
-    public int getPointsCount() {
-        return points.size();
-    }
-
-    public void setPoints(TreeSet<MPoint> points) {
-        this.points = points;
-        screenXy = new int[2][points.size()];
-        updateCorner();
-        updateScreenXy();
-    }
-
-    private void updateCorner() {
-        right = top = Double.MIN_VALUE;
-        left = bottom = Double.MAX_VALUE;
-        for (MPoint mPoint : points) {
-            if (right < mPoint.x)
-                right = mPoint.x;
-
-            if (left > mPoint.x)
-                left = mPoint.x;
-
-            if (top < mPoint.y)
-                top = mPoint.y;
-
-            if (bottom > mPoint.y)
-                bottom = mPoint.y;
-        }
-    }
-
-    public void setSize(int width, int height) {
-        this.width = width;
-        this.height = height;
-        updateCorner();
-        updateScreenXy();
-    }
-}
