@@ -1,6 +1,6 @@
 package UI;
 
-import Data.MPoint;
+import Data.Point;
 import Data.Section;
 import Data.WaterLevelItem;
 import org.jfree.chart.ChartFactory;
@@ -17,7 +17,6 @@ import org.jfree.ui.HorizontalAlignment;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -30,7 +29,7 @@ interface PlayerListener {
 }
 
 public class Player {
-    private List<MPoint> sectionPoints;
+    private List<Point> sectionPoints;
     private List<WaterLevelItem> waterLevelItems;
     private ListIterator<WaterLevelItem> waterLevelIter;
     private JFreeChart chart;
@@ -43,12 +42,7 @@ public class Player {
 
     private TextTitle dateTitle;
     private TextTitle waterLevelTitle;
-    ActionListener timerListener = new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            FrameForward();
-        }
-    };
+    ActionListener timerListener = e -> FrameForward();
 
     public Player() {
         this.timer = new Timer(100, timerListener);
@@ -119,8 +113,7 @@ public class Player {
     }
 
     public void onFinished() {
-        for (PlayerListener listener : playerListenerList)
-            listener.performOnFinish();
+        playerListenerList.forEach(UI.PlayerListener::performOnFinish);
     }
 
     private void setFinished() {
@@ -219,7 +212,7 @@ public class Player {
 
     private void updateDataset() {
         sectionSeries.clear();
-        for (MPoint point : sectionPoints)
+        for (Point point : sectionPoints)
             sectionSeries.add(point.x, point.y);
 
         waterSeries.clear();

@@ -13,10 +13,10 @@ import java.util.TreeMap;
 
 /**
  * Created by Wenxuan on 2015/10/14.
+ * Email: wenxuan-zhang@outlook.com
  */
 public class SectionDynamicWaterLevelPlot {
     private TreeMap<Integer, Section> sectionPoints;
-    private MainFrame frame;
 
     public SectionDynamicWaterLevelPlot() {
         sectionPoints = new TreeMap<>();
@@ -43,7 +43,7 @@ public class SectionDynamicWaterLevelPlot {
     }
 
     public void ShowFrame() {
-        frame = new MainFrame(sectionPoints);
+        MainFrame frame = new MainFrame(sectionPoints);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setSize(800, 600);
         frame.setLocationRelativeTo(null);

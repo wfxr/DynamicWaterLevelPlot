@@ -4,87 +4,53 @@ import Data.Section;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.TreeMap;
 
 /**
  * Created by Wenxuan on 2015/10/14.
+ * Email: wenxuan-zhang@outlook.com
  */
 public class MainFrame extends JFrame {
-    ActionListener exitListener = new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            Exit();
-        }
-    };
     private TreeMap<Integer, Section> sectionMap;
-    private Section section;  // 当前断面
     private Player player;
-    ActionListener frameForwardListener = new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            player.FrameForward();
-        }
-    };
-    ActionListener frameBackwardListener = new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            player.FrameBackward();
-        }
-    };
-    private GridBagLayout layout;
-    private JPanel controlPanel;
 
-//    private JLabel lblTitle;
-private JPanel statusPanel;
+    private JPanel controlPanel;
+    private JPanel statusPanel;
     private JPanel playerPanel;
     private JPanel optionPanel;
-    private JButton btnSwitch;
-    ActionListener switchListener = new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            if (player.IsStopped()) {
-                player.Play();
-                btnSwitch.setText("暂停");
-            } else if (player.IsFinished()) {
-                player.Stop();
-                player.Play();
-                btnSwitch.setText("暂停");
-            } else if (player.IsPaused()) {
-                btnSwitch.setText("暂停");
-                player.Play();
-            } else if (player.IsPlaying()) {
-                player.Pause();
-                btnSwitch.setText("运行");
-            }
-        }
-    };
-    ActionListener stopListener = new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            player.Stop();
-            btnSwitch.setText("运行");
-        }
-    };
-    PlayerListener playerListener = new PlayerListener() {
 
-        @Override
-        public void performOnFinish() {
+    private JButton btnSwitch;
+    private JComboBox<Object> cbxSection;
+
+    private ActionListener onSwitch = e -> {
+        if (player.IsStopped()) {
+            player.Play();
+            btnSwitch.setText("暂停");
+        } else if (player.IsFinished()) {
+            player.Stop();
+            player.Play();
+            btnSwitch.setText("暂停");
+        } else if (player.IsPaused()) {
+            btnSwitch.setText("暂停");
+            player.Play();
+        } else if (player.IsPlaying()) {
+            player.Pause();
             btnSwitch.setText("运行");
         }
     };
-    private JButton btnFrameForward;
-    private JButton btnFrameBackward;
-    private JButton btnExit;
-    private JButton btnStop;
-    private JComboBox cbxSection;
-    ActionListener setSectionListener =  new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            SetSection(sectionMap.get(cbxSection.getSelectedItem()));
-        }
+
+    private ActionListener onSetSection = e -> {
+        Integer sectionId = (Integer) cbxSection.getSelectedItem();
+        player.setSection(sectionMap.get(sectionId));
     };
+
+    private ActionListener onStop = e -> {
+        player.Stop();
+        btnSwitch.setText("运行");
+    };
+
+    private ActionListener onExit = e -> System.exit(0);
 
     public MainFrame(TreeMap<Integer, Section> sectionMap) {
         this.setTitle("河道断面动态水位演示");
@@ -103,38 +69,28 @@ private JPanel statusPanel;
             cbxSection.setSelectedIndex(0);
     }
 
-    private void SetSection(Section section){
-        this.section = section;
-        player.setSection(section);
-    }
-
-    private void Exit() {
-        System.exit(0);
-    }
-
     public void InitComponents() {
-//        lblTitle = new JLabel("水位-时间模拟");
         optionPanel = new JPanel();
         controlPanel = new JPanel();
         playerPanel = player.createPlayerPanel();
         statusPanel = new JPanel();
 
-        cbxSection = new JComboBox();
+        cbxSection = new JComboBox<>();
 
         btnSwitch = new JButton("运行");
-        btnFrameForward = new JButton("下一帧");
-        btnFrameBackward = new JButton("上一帧");
-        btnStop = new JButton("停止");
-        btnExit = new JButton("退出");
+        JButton btnFrameForward = new JButton("下一帧");
+        JButton btnFrameBackward = new JButton("上一帧");
+        JButton btnStop = new JButton("停止");
+        JButton btnExit = new JButton("退出");
 
-        cbxSection.addActionListener(setSectionListener);
-        btnSwitch.addActionListener(switchListener);
-        btnFrameForward.addActionListener(frameForwardListener);
-        btnFrameBackward.addActionListener(frameBackwardListener);
-        btnStop.addActionListener(stopListener);
-        btnExit.addActionListener(exitListener);
+        cbxSection.addActionListener(onSetSection);
+        btnSwitch.addActionListener(onSwitch);
+        btnFrameForward.addActionListener(e -> player.FrameForward());
+        btnFrameBackward.addActionListener(e -> player.FrameBackward());
+        btnStop.addActionListener(onStop);
+        btnExit.addActionListener(onExit);
 
-        player.addPlayerListenerList(playerListener);
+        player.addPlayerListenerList(() -> btnSwitch.setText("运行"));
 
         optionPanel.add(new JLabel("选择断面："));
         optionPanel.add(cbxSection);
@@ -150,14 +106,12 @@ private JPanel statusPanel;
         this.add(optionPanel);
         this.add(playerPanel);
         this.add(controlPanel);
-        // TODO:添加状态区
-//        this.add(statusPanel);
 
         SetLayout();
     }
 
     public void SetLayout() {
-        layout = new GridBagLayout();
+        GridBagLayout layout = new GridBagLayout();
         GridBagConstraints constraints = new GridBagConstraints();
         // 选项区
         constraints.gridx = 0;
@@ -206,9 +160,8 @@ private JPanel statusPanel;
         this.setLayout(layout);
     }
 
-    public void LoadSectionComboBox(){
-        DefaultComboBoxModel model = new DefaultComboBoxModel<>(sectionMap.keySet().toArray());
+    public void LoadSectionComboBox() {
+        ComboBoxModel<Object> model = new DefaultComboBoxModel<>(sectionMap.keySet().toArray());
         cbxSection.setModel(model);
     }
 }
-
