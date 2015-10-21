@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="Encoding" defaultCharsetForPropertiesFiles="UTF-8">
-    <file url="file://$PROJECT_DIR$/src/main/java/Data/MPoint.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/Data/Point.java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/java/Data/Section.java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/java/Data/SectionMapHelper.java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/java/Data/WaterLevelItem.java" charset="UTF-8" />
