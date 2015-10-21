@@ -1,8 +1,8 @@
-package UI;
+package ui;
 
-import Data.Point;
-import Data.Section;
-import Data.WaterLevelItem;
+import util.Point;
+import util.Section;
+import util.WaterLevelItem;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -24,6 +24,10 @@ import java.util.List;
 import java.util.ListIterator;
 
 
+/**
+ * Created by Wenxuan on 2015/10/17.
+ * Email: wenxuan-zhang@outlook.com
+ */
 interface PlayerListener {
     void performOnFinish();
 }
@@ -113,7 +117,7 @@ public class Player {
     }
 
     public void onFinished() {
-        playerListenerList.forEach(UI.PlayerListener::performOnFinish);
+        playerListenerList.forEach(ui.PlayerListener::performOnFinish);
     }
 
     private void setFinished() {

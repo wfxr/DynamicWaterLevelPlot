@@ -1,6 +1,6 @@
-package UI;
+package ui;
 
-import Data.Section;
+import util.Section;
 
 import javax.swing.*;
 import java.awt.*;

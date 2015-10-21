@@ -1,4 +1,4 @@
-package Data;
+package util;
 
 /**
  * Created by Wenxuan on 2015/10/14.
