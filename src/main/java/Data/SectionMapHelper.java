@@ -9,7 +9,8 @@ import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.*;
 
 /**
- * Created by Wenxu on 2015/10/14.
+ * Created by Wenxuan on 2015/10/14.
+ * Email: wenxuan-zhang@outlook.com
  */
 public class SectionMapHelper {
     public static void LoadMeasurementPointsFromXls(
@@ -21,10 +22,10 @@ public class SectionMapHelper {
             double posX = row.getCell(1).getNumericCellValue();
             double posY = row.getCell(2).getNumericCellValue();
             if (sectionMap.containsKey(id))
-                sectionMap.get(id).AddMeasurementPoint(new MPoint(posX, posY));
+                sectionMap.get(id).AddMeasurementPoint(new Point(posX, posY));
             else {
                 Section newSection = new Section();
-                newSection.AddMeasurementPoint(new MPoint(posX, posY));
+                newSection.AddMeasurementPoint(new Point(posX, posY));
                 sectionMap.put(id, newSection);
             }
         }

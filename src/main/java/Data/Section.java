@@ -3,10 +3,11 @@ package Data;
 import java.util.*;
 
 /**
- * Created by Wenxu on 2015/10/14.
+ * Created by Wenxuan on 2015/10/14.
+ * Email: wenxuan-zhang@outlook.com
  */
 public class Section {
-    private List<MPoint> points; // 断面测点高程数据
+    private List<Point> points; // 断面测点高程数据
     private List<WaterLevelItem> waterLevels; // 时间-水位数据
 
     public Section() {
@@ -18,9 +19,7 @@ public class Section {
         return waterLevels;
     }
 
-    public int getWaterLevelsCount() { return waterLevels.size();}
-
-    public void AddMeasurementPoint(MPoint point) {
+    public void AddMeasurementPoint(Point point) {
         points.add(point);
     }
 
@@ -28,9 +27,7 @@ public class Section {
         waterLevels.add(new WaterLevelItem(date, waterLevel));
     }
 
-    public List<MPoint> getPoints() {
+    public List<Point> getPoints() {
         return points;
     }
-
-    public double getWaterLevel(int index) {return waterLevels.get(index).WaterLevel; }
 }
