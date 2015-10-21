@@ -1,4 +1,0 @@
-Manifest-Version: 1.0
-Class-Path: lib\jfreechart-1.0.19.jar lib\jcommon-1.0.23.jar lib\poi-3
- .13-20150929.jar
-Main-Class: Demo.SectionDynamicWaterLevelPlot

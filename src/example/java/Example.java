@@ -1,8 +1,6 @@
-package Demo;
-
-import Data.Section;
-import Data.SectionMapHelper;
-import UI.MainFrame;
+import util.Section;
+import util.SectionMapHelper;
+import ui.MainFrame;
 
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
@@ -15,10 +13,10 @@ import java.util.TreeMap;
  * Created by Wenxuan on 2015/10/14.
  * Email: wenxuan-zhang@outlook.com
  */
-public class SectionDynamicWaterLevelPlot {
+public class Example {
     private TreeMap<Integer, Section> sectionPoints;
 
-    public SectionDynamicWaterLevelPlot() {
+    public Example() {
         sectionPoints = new TreeMap<>();
     }
 
@@ -37,7 +35,7 @@ public class SectionDynamicWaterLevelPlot {
         initGlobalFontSetting(new Font("微软雅黑", Font.PLAIN, 16));
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 
-        SectionDynamicWaterLevelPlot wls = new SectionDynamicWaterLevelPlot();
+        Example wls = new Example();
         wls.LoadData("testdata/Sections.xls", "testdata/WaterLevels.xls");
         wls.ShowFrame();
     }
