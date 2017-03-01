@@ -13,7 +13,7 @@ import java.util.TreeMap;
  */
 public class MainFrame extends JFrame {
     private TreeMap<Integer, Section> sectionMap;
-    private ui.Player player;
+    private Player player;
 
     private JPanel controlPanel;
     private JPanel statusPanel;
