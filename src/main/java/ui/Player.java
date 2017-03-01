@@ -117,7 +117,7 @@ public class Player {
     }
 
     public void onFinished() {
-        playerListenerList.forEach(ui.PlayerListener::performOnFinish);
+        playerListenerList.forEach(PlayerListener::performOnFinish);
     }
 
     private void setFinished() {
